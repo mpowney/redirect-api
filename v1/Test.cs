@@ -19,7 +19,7 @@ namespace api.v1
             ClaimsPrincipal claimsPrincipal)
         {
 
-            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Name} = {claim.Value}"; }))}");
+            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Label} ({claim.Subject.Name}) = {claim.Value}"; }))}");
             
         }
 
@@ -31,7 +31,7 @@ namespace api.v1
             ClaimsPrincipal claimsPrincipal)
         {
 
-            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Name} = {claim.Value}"; }))}");
+            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Label} ({claim.Subject.Name}) = {claim.Value}"; }))}");
             
         }
 
@@ -44,7 +44,7 @@ namespace api.v1
             
         {
 
-            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Name} = {claim.Value}"; }))}");
+            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Label} ({claim.Subject.Name}) = {claim.Value}"; }))}");
             
         }
 
@@ -56,7 +56,7 @@ namespace api.v1
             ClaimsPrincipal claimsPrincipal)
         {
 
-            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Name} = {claim.Value}"; }))}");
+            return new OkObjectResult($"Success\n\n {string.Join("\n", claimsPrincipal.Claims.Select(claim => { return $"{claim.Subject.Label} ({claim.Subject.Name}) = {claim.Value}"; }))}");
             
         }
 
