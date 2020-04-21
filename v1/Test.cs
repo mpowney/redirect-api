@@ -20,6 +20,15 @@ namespace api.v1
             return new OkObjectResult("Success");
             
         }
+        public static async Task<IActionResult> TestWithAuthPost (
+            [HttpTrigger(AuthorizationLevel.User, "post", Route = "_api/v1/test-with-auth")] HttpRequest req,
+            ILogger log,
+            ExecutionContext context)
+        {
+
+            return new OkObjectResult("Success");
+            
+        }
     }
 
 }
