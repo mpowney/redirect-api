@@ -28,7 +28,7 @@ namespace api.entities
 
             TableQuery<RedirectEntity> rangeQuery = new TableQuery<RedirectEntity>().Where(
                 TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("ParitionKey", QueryComparisons.Equal, 
+                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
                             $"{collection}"),
                         TableOperators.And,
                         TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, 
@@ -53,7 +53,7 @@ namespace api.entities
             await redirectTable.CreateIfNotExistsAsync();
 
             TableQuery<RedirectEntity> rangeQuery = new TableQuery<RedirectEntity>().Where(
-                    TableQuery.GenerateFilterCondition("ParitionKey", QueryComparisons.Equal, 
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
                         $"{collection}"));
 
             var sessionRedirectFound = await redirectTable.ExecuteQuerySegmentedAsync(rangeQuery, null);
