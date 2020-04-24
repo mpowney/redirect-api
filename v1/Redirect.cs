@@ -75,7 +75,7 @@ namespace api.v1
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
 
-            if (data?.key == null || data?.redirectTo == null) {
+            if (data?.rowKey == null || data?.redirectTo == null) {
                 return new BadRequestObjectResult($"Please specify the key and redirectTo parameters in the request body");
             }
 
@@ -84,7 +84,7 @@ namespace api.v1
                 return new BadRequestObjectResult($"Redirect with ${data.key} already exists for ${claimsPrincipal.Identity.Name}");
             }
 
-            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, data.key, data.redirectTo, 0, null);
+            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, data.rowKey, data.redirectTo, 0, null);
             if (!success) {
                 return new BadRequestObjectResult($"Error occurred creating ${data.key} already exists for ${claimsPrincipal.Identity.Name}");
             }
