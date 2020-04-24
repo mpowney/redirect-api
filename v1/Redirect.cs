@@ -75,7 +75,7 @@ namespace api.v1
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
 
-            if (!data?.key || !data?.redirectTo) {
+            if (data?.key == null || data?.redirectTo == null) {
                 return new BadRequestObjectResult($"Please specify the key and redirectTo parameters in the request body");
             }
 
