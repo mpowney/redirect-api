@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
@@ -84,7 +85,7 @@ namespace api.v1
                 return new BadRequestObjectResult($"Redirect with ${data.key} already exists for ${claimsPrincipal.Identity.Name}");
             }
 
-            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, data.rowKey, data.redirectTo, 0, null);
+            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, data.rowKey, data.redirectTo, 0, new Dictionary<string, int>());
             if (!success) {
                 return new BadRequestObjectResult($"Error occurred creating ${data.key} already exists for ${claimsPrincipal.Identity.Name}");
             }
