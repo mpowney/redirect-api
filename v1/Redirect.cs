@@ -96,7 +96,7 @@ namespace api.v1
 
         [FunctionName("RedirectPatch")]
         public static async Task<IActionResult> RedirectPatch (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "path", Route = "_api/v1/redirect")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "_api/v1/redirect")] HttpRequest req,
             [Table(TableNames.Refirects)] CloudTable redirectTable,
             ILogger log,
             ExecutionContext context,
