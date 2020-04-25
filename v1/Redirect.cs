@@ -80,6 +80,7 @@ namespace api.v1
                 return new BadRequestObjectResult($"Please specify the key and redirectTo parameters in the request body");
             }
 
+            log.LogInformation($"Getting Redirect row for values ${claimsPrincipal.Identity.Name} and ${data.rowKey}");
             RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, data.rowKey);
             if (existingEntity != null) {
                 return new BadRequestObjectResult($"Redirect with ${data.rowKey} already exists for ${claimsPrincipal.Identity.Name}");
@@ -114,6 +115,7 @@ namespace api.v1
                 return new BadRequestObjectResult($"Please specify the key and redirectTo parameters in the request body");
             }
 
+            log.LogInformation($"Getting Redirect row for values ${claimsPrincipal.Identity.Name} and ${data.rowKey}");
             RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, data.rowKey);
             if (existingEntity == null) {
                 return new BadRequestObjectResult($"Redirect with ${data.rowKey} doesn't exist for ${claimsPrincipal.Identity.Name}");

@@ -22,14 +22,14 @@ namespace api.entities
         public string RedirectTo { get; set; }
         public int ClickCount { get; set; }
         public string GeoCount { get; set; }
-        public static async Task<RedirectEntity> get(CloudTable redirectTable, string collection, string key) {
+        public static async Task<RedirectEntity> get(CloudTable redirectTable, string? collection, string key) {
 
             await redirectTable.CreateIfNotExistsAsync();
 
             TableQuery<RedirectEntity> rangeQuery = new TableQuery<RedirectEntity>().Where(
                 TableQuery.CombineFilters(
                         TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
-                            $"{collection}"),
+                            $"{collection ??= string.Empty}"),
                         TableOperators.And,
                         TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, 
                             $"{key}")));
@@ -48,13 +48,13 @@ namespace api.entities
             }
 
         }
-        public static async Task<RedirectEntity[]> get(CloudTable redirectTable, string collection) {
+        public static async Task<RedirectEntity[]> get(CloudTable redirectTable, string? collection) {
 
             await redirectTable.CreateIfNotExistsAsync();
 
             TableQuery<RedirectEntity> rangeQuery = new TableQuery<RedirectEntity>().Where(
                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
-                        $"{collection}"));
+                        $"{collection ??= string.Empty}"));
 
             var sessionRedirectFound = await redirectTable.ExecuteQuerySegmentedAsync(rangeQuery, null);
             if (sessionRedirectFound.Results.Count > 0) {
