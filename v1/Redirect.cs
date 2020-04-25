@@ -80,19 +80,54 @@ namespace api.v1
                 return new BadRequestObjectResult($"Please specify the key and redirectTo parameters in the request body");
             }
 
-            RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, data.key);
+            RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, data.rowKey);
             if (existingEntity != null) {
-                return new BadRequestObjectResult($"Redirect with ${data.key} already exists for ${claimsPrincipal.Identity.Name}");
+                return new BadRequestObjectResult($"Redirect with ${data.rowKey} already exists for ${claimsPrincipal.Identity.Name}");
             }
 
             bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, data.rowKey, data.redirectTo, 0, new Dictionary<string, int>());
             if (!success) {
-                return new BadRequestObjectResult($"Error occurred creating ${data.key} already exists for ${claimsPrincipal.Identity.Name}");
+                return new BadRequestObjectResult($"Error occurred creating ${data.rowKey} already exists for ${claimsPrincipal.Identity.Name}");
             }
 
             return new OkResult();
             
         }
+
+        [FunctionName("RedirectPatch")]
+        public static async Task<IActionResult> RedirectPatch (
+            [HttpTrigger(AuthorizationLevel.Anonymous, "path", Route = "_api/v1/redirect")] HttpRequest req,
+            [Table(TableNames.Refirects)] CloudTable redirectTable,
+            ILogger log,
+            ExecutionContext context,
+            ClaimsPrincipal claimsPrincipal)
+        {
+
+            if (!claimsPrincipal.Identity.IsAuthenticated) {
+                return new UnauthorizedResult();
+            }
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+
+            if (data?.rowKey == null || data?.redirectTo == null) {
+                return new BadRequestObjectResult($"Please specify the key and redirectTo parameters in the request body");
+            }
+
+            RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, data.rowKey);
+            if (existingEntity == null) {
+                return new BadRequestObjectResult($"Redirect with ${data.rowKey} doesn't exist for ${claimsPrincipal.Identity.Name}");
+            }
+
+            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, data.rowKey, data.redirectTo, 0, new Dictionary<string, int>());
+            if (!success) {
+                return new BadRequestObjectResult($"Error occurred updating ${data.rowKey} for ${claimsPrincipal.Identity.Name}");
+            }
+
+            return new OkResult();
+            
+        }
+
     }
 
 }
