@@ -120,8 +120,9 @@ namespace api.v1
             if (existingEntity == null) {
                 return new BadRequestObjectResult($"Redirect with {entity.RowKey} doesn't exist for {claimsPrincipal.Identity.Name}");
             }
+            existingEntity.RedirectTo = entity.RedirectTo;
 
-            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, entity.RowKey, entity.RedirectTo, 0, new Dictionary<string, int>());
+            bool success = await RedirectEntity.put(redirectTable, existingEntity);
             if (!success) {
                 return new BadRequestObjectResult($"Error occurred updating {entity.RowKey} for {claimsPrincipal.Identity.Name}");
             }

@@ -92,6 +92,25 @@ namespace api.entities
 
         }
 
+        public static async Task<bool> put(CloudTable redirectTable, RedirectEntity entity) {
+     
+            await redirectTable.CreateIfNotExistsAsync();
+            
+            try {
+
+                TableOperation insertCacheOperation = TableOperation.InsertOrMerge(entity);
+                await redirectTable.ExecuteAsync(insertCacheOperation);
+
+            }
+            catch {
+
+                return false;
+                
+            }
+            return true;
+
+        }
+
     }
 
 }
