@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Security.Claims;
@@ -86,7 +87,7 @@ namespace api.v1
                 return new BadRequestObjectResult($"Redirect with {entity.RowKey} already exists for {claimsPrincipal.Identity.Name}");
             }
 
-            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, entity.RowKey, entity.RedirectTo, 0, new Dictionary<string, int>());
+            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, entity.RowKey, entity.RedirectTo, 0, new Dictionary<string, int>(), DateTime.Now);
             if (!success) {
                 return new BadRequestObjectResult($"Error occurred creating {entity.RowKey} already exists for {claimsPrincipal.Identity.Name}");
             }

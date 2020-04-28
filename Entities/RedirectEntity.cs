@@ -2,6 +2,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
 
 namespace api.entities
 {
@@ -22,6 +23,7 @@ namespace api.entities
         public string RedirectTo { get; set; }
         public int ClickCount { get; set; }
         public string GeoCount { get; set; }
+        public DateTime Created { get; set; }
         public static async Task<RedirectEntity> get(CloudTable redirectTable, string? collection, string key) {
 
             await redirectTable.CreateIfNotExistsAsync();
@@ -72,14 +74,14 @@ namespace api.entities
         }
 
 
-        public static async Task<bool> put(CloudTable redirectTable, string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount) {
+        public static async Task<bool> put(CloudTable redirectTable, string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount, DateTime created) {
      
             await redirectTable.CreateIfNotExistsAsync();
             
             try {
 
                 RedirectEntity newEntity = new RedirectEntity(collection, key, redirectTo, clickCount, geoCount);
-                TableOperation insertCacheOperation = TableOperation.InsertOrMerge(newEntity);
+                TableOperation insertCacheOperation = TableOperation.Insert(newEntity);
                 await redirectTable.ExecuteAsync(insertCacheOperation);
 
             }
