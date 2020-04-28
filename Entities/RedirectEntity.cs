@@ -9,7 +9,7 @@ namespace api.entities
     public class RedirectEntity : TableEntity
     {
         public RedirectEntity() {}
-        public RedirectEntity(string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount) {
+        public RedirectEntity(string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount, DateTime created) {
             
             string _geoCount = JsonConvert.SerializeObject(geoCount);
 
@@ -18,6 +18,7 @@ namespace api.entities
             this.RedirectTo = redirectTo;
             this.ClickCount = clickCount;
             this.GeoCount = _geoCount;
+            this.Created = created;
             
         }
         public string RedirectTo { get; set; }
@@ -80,9 +81,9 @@ namespace api.entities
             
             try {
 
-                RedirectEntity newEntity = new RedirectEntity(collection, key, redirectTo, clickCount, geoCount);
-                TableOperation insertCacheOperation = TableOperation.Insert(newEntity);
-                await redirectTable.ExecuteAsync(insertCacheOperation);
+                RedirectEntity newEntity = new RedirectEntity(collection, key, redirectTo, clickCount, geoCount, created);
+                TableOperation insertEntityOperation = TableOperation.InsertOrMerge(newEntity);
+                await redirectTable.ExecuteAsync(insertEntityOperation);
 
             }
             catch {
