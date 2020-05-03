@@ -76,7 +76,7 @@ namespace api.entities
                     return true;
                 }
 
-                TableOperation insertGeoOperation = TableOperation.Insert(entityToInsert);
+                TableOperation insertGeoOperation = TableOperation.InsertOrMerge(entityToInsert);
                 await geoTable.ExecuteAsync(insertGeoOperation);
 
             }
