@@ -9,7 +9,7 @@ namespace api.entities
     public class RedirectEntity : TableEntity
     {
         public RedirectEntity() {}
-        public RedirectEntity(string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount, DateTime created) {
+        public RedirectEntity(string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount, DateTime created, bool recycled) {
             
             string _geoCount = JsonConvert.SerializeObject(geoCount);
 
@@ -19,12 +19,14 @@ namespace api.entities
             this.ClickCount = clickCount;
             this.GeoCount = _geoCount;
             this.Created = created;
+            this.Recycled = recycled;
             
         }
         public string RedirectTo { get; set; }
         public int ClickCount { get; set; }
         public string GeoCount { get; set; }
         public DateTime Created { get; set; }
+        public bool Recycled { get; set; }
         public static async Task<RedirectEntity> get(CloudTable redirectTable, string? collection, string key) {
 
             await redirectTable.CreateIfNotExistsAsync();
@@ -75,13 +77,13 @@ namespace api.entities
         }
 
 
-        public static async Task<bool> put(CloudTable redirectTable, string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount, DateTime created) {
+        public static async Task<bool> put(CloudTable redirectTable, string collection, string key, string redirectTo, int clickCount, IDictionary<string, int> geoCount, DateTime created, bool recycled) {
      
             await redirectTable.CreateIfNotExistsAsync();
             
             try {
 
-                RedirectEntity newEntity = new RedirectEntity(collection, key, redirectTo, clickCount, geoCount, created);
+                RedirectEntity newEntity = new RedirectEntity(collection, key, redirectTo, clickCount, geoCount, created, recycled);
                 TableOperation insertEntityOperation = TableOperation.InsertOrMerge(newEntity);
                 await redirectTable.ExecuteAsync(insertEntityOperation);
 

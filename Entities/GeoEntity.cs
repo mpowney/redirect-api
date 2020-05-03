@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace api.enttiies
+namespace api.entities
 {
 
     public class GeoEntity : TableEntity {
@@ -16,6 +16,9 @@ namespace api.enttiies
             this.TimeZone = timeZone;
             this.Latitude = latitude;
             this.Longitude = longitude;
+
+            this.RowKey = $"{this.CountryCode}-{this.RegionCode}-{this.City}-{this.ZipCode}";
+
         }
 
         public GeoEntity(dynamic rawObject) {
@@ -26,7 +29,10 @@ namespace api.enttiies
             this.TimeZone = rawObject.time_zone;
             this.Latitude = rawObject.latitude;
             this.Longitude = rawObject.longitude;
+
+            this.RowKey = $"{this.CountryCode}-{this.RegionCode}-{this.City}-{this.ZipCode}";
         }
+
         public string CountryCode { get; set; }
         public string CountryName { get; set; }
         public string RegionCode { get; set; }
@@ -35,13 +41,6 @@ namespace api.enttiies
         public string TimeZone {get; set; }
         public double Latitude {get; set; }
         public double Longitude {get; set; }
-
-        public string RowKey { get {
-            if (this.RowKey != null && this.RowKey != string.Empty) {
-                return this.RowKey;    
-            }
-            return $"{this.CountryCode}-{this.RegionCode}-{this.City}-{this.ZipCode}";
-        }}
 
         public static async Task<GeoEntity> get(CloudTable geoTable, string key) {
 
@@ -66,15 +65,19 @@ namespace api.enttiies
 
         }
 
-        public static async Task<bool> put(CloudTable geoTable, GeoEntity entityToUpdate) {
+        public static async Task<bool> put(CloudTable geoTable, GeoEntity entityToInsert) {
      
             await geoTable.CreateIfNotExistsAsync();
             
             try {
 
-                // GeoEntity newEntity = new GeoEntity(key, redirectTo, clickCount, geoCount);
-                TableOperation insertCacheOperation = TableOperation.InsertOrMerge(entityToUpdate);
-                await geoTable.ExecuteAsync(insertCacheOperation);
+                GeoEntity entity = await GeoEntity.get(geoTable, entityToInsert.RowKey);
+                if (entity != null) {
+                    return true;
+                }
+
+                TableOperation insertGeoOperation = TableOperation.Insert(entityToInsert);
+                await geoTable.ExecuteAsync(insertGeoOperation);
 
             }
             catch {

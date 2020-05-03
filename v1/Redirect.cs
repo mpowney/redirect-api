@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Security.Claims;
@@ -19,7 +20,7 @@ namespace api.v1
         [FunctionName("RedirectsGet")]
         public static async Task<IActionResult> RedirectsGet (
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirects")] HttpRequest req,
-            [Table(TableNames.Refirects)] CloudTable redirectTable,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
             ILogger log,
             ExecutionContext context,
             ClaimsPrincipal claimsPrincipal)
@@ -30,6 +31,29 @@ namespace api.v1
             }
 
             RedirectEntity[] entities = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name);
+            entities = (RedirectEntity[])entities.Where(redirect => redirect.Recycled == false);
+            if (entities == null) {
+                return new OkObjectResult(new RedirectEntity[] {});
+            }
+
+            return new OkObjectResult(entities);
+
+        }
+
+        public static async Task<IActionResult> RecycledRedirectsGet (
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirects/recycled")] HttpRequest req,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
+            ILogger log,
+            ExecutionContext context,
+            ClaimsPrincipal claimsPrincipal)
+        {
+
+            if (!claimsPrincipal.Identity.IsAuthenticated) {
+                return new UnauthorizedResult();
+            }
+
+            RedirectEntity[] entities = (await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name));
+            entities = (RedirectEntity[])entities.Where(redirect => redirect.Recycled == true);
             if (entities == null) {
                 return new OkObjectResult(new RedirectEntity[] {});
             }
@@ -41,7 +65,7 @@ namespace api.v1
         [FunctionName("RedirectGet")]
         public static async Task<IActionResult> RedirectGet (
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirect/{key}")] HttpRequest req,
-            [Table(TableNames.Refirects)] CloudTable redirectTable,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
             string key,
             ILogger log,
             ExecutionContext context,
@@ -61,10 +85,36 @@ namespace api.v1
 
         }
 
+        [FunctionName("RedirectDelete")]
+        public static async Task<IActionResult> RedirectDelete (
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "_api/v1/redirect/{key}")] HttpRequest req,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
+            string key,
+            ILogger log,
+            ExecutionContext context,
+            ClaimsPrincipal claimsPrincipal)
+        {
+
+            if (!claimsPrincipal.Identity.IsAuthenticated) {
+                return new UnauthorizedResult();
+            }
+
+            RedirectEntity entity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, key);
+            if (entity == null) {
+                return new NotFoundResult();
+            }
+
+            entity.Recycled = true;
+            await RedirectEntity.put(redirectTable, entity);
+
+            return new OkObjectResult(entity);
+
+        }
+
         [FunctionName("RedirectPost")]
         public static async Task<IActionResult> RedirectPost (
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "_api/v1/redirect")] HttpRequest req,
-            [Table(TableNames.Refirects)] CloudTable redirectTable,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
             ILogger log,
             ExecutionContext context,
             ClaimsPrincipal claimsPrincipal)
@@ -87,7 +137,7 @@ namespace api.v1
                 return new BadRequestObjectResult($"Redirect with {entity.RowKey} already exists for {claimsPrincipal.Identity.Name}");
             }
 
-            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, entity.RowKey, entity.RedirectTo, 0, new Dictionary<string, int>(), DateTime.Now);
+            bool success = await RedirectEntity.put(redirectTable, claimsPrincipal.Identity.Name, entity.RowKey, entity.RedirectTo, 0, new Dictionary<string, int>(), DateTime.Now, false);
             if (!success) {
                 return new BadRequestObjectResult($"Error occurred creating {entity.RowKey} already exists for {claimsPrincipal.Identity.Name}");
             }
@@ -99,7 +149,7 @@ namespace api.v1
         [FunctionName("RedirectPatch")]
         public static async Task<IActionResult> RedirectPatch (
             [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "_api/v1/redirect")] HttpRequest req,
-            [Table(TableNames.Refirects)] CloudTable redirectTable,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
             ILogger log,
             ExecutionContext context,
             ClaimsPrincipal claimsPrincipal)
