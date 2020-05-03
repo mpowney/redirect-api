@@ -53,7 +53,7 @@ namespace api.entities
             }
 
         }
-        public static async Task<RedirectEntity[]> get(CloudTable redirectTable, string? collection) {
+        public static async Task<IEnumerable<RedirectEntity>> get(CloudTable redirectTable, string? collection) {
 
             await redirectTable.CreateIfNotExistsAsync();
 
@@ -64,8 +64,7 @@ namespace api.entities
             var sessionRedirectFound = await redirectTable.ExecuteQuerySegmentedAsync(rangeQuery, null);
             if (sessionRedirectFound.Results.Count > 0) {
 
-                RedirectEntity[] entities = sessionRedirectFound.Results.ToArray();
-                return entities;
+                return sessionRedirectFound.Results;
 
             }
             else {
