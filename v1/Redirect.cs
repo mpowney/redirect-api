@@ -30,8 +30,8 @@ namespace api.v1
                 return new UnauthorizedResult();
             }
 
-            IEnumerable<RedirectEntity> entities = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name);
-            RedirectEntity[] filteredEntities = (RedirectEntity[])entities.Where(redirect => redirect.Recycled == false).ToArray();
+            List<RedirectEntity> entities = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name);
+            RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == false).ToArray();
             if (filteredEntities == null || filteredEntities.Length == 0) {
                 return new OkObjectResult(new RedirectEntity[] {});
             }
@@ -52,8 +52,8 @@ namespace api.v1
                 return new UnauthorizedResult();
             }
 
-            IEnumerable<RedirectEntity> entities = (await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name));
-            RedirectEntity[] filteredEntities = (RedirectEntity[])entities.Where(redirect => redirect.Recycled == false).ToArray();
+            List<RedirectEntity> entities = (await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name));
+            RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == false).ToArray();
             if (filteredEntities == null || filteredEntities.Length == 0) {
                 return new OkObjectResult(new RedirectEntity[] {});
             }

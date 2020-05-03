@@ -53,7 +53,7 @@ namespace api.entities
             }
 
         }
-        public static async Task<IEnumerable<RedirectEntity>> get(CloudTable redirectTable, string? collection) {
+        public static async Task<List<RedirectEntity>> get(CloudTable redirectTable, string? collection) {
 
             await redirectTable.CreateIfNotExistsAsync();
 
