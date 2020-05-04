@@ -40,6 +40,7 @@ namespace api.v1
 
         }
 
+        [FunctionName("RecycledRedirectsGet")]
         public static async Task<IActionResult> RecycledRedirectsGet (
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirects/recycled")] HttpRequest req,
             [Table(TableNames.Redirects)] CloudTable redirectTable,
@@ -102,6 +103,11 @@ namespace api.v1
             RedirectEntity entity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, key);
             if (entity == null) {
                 return new NotFoundResult();
+            }
+
+            if (entity.Recycled) {
+                await RedirectEntity.delete(redirectTable, entity);
+                return new OkObjectResult(entity);
             }
 
             entity.Recycled = true;

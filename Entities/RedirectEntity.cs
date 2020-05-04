@@ -102,8 +102,27 @@ namespace api.entities
             
             try {
 
-                TableOperation insertCacheOperation = TableOperation.InsertOrMerge(entity);
-                await redirectTable.ExecuteAsync(insertCacheOperation);
+                TableOperation insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
+                await redirectTable.ExecuteAsync(insertOrMergeOperation);
+
+            }
+            catch {
+
+                return false;
+                
+            }
+            return true;
+
+        }
+
+        public static async Task<bool> delete(CloudTable redirectTable, RedirectEntity entity) {
+     
+            await redirectTable.CreateIfNotExistsAsync();
+            
+            try {
+
+                TableOperation deleteOperation = TableOperation.Delete(entity);
+                await redirectTable.ExecuteAsync(deleteOperation);
 
             }
             catch {
