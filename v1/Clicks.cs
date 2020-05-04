@@ -46,7 +46,7 @@ namespace api.v1
                     return new NotFoundResult();
                 }
 
-                req.HttpContext.Response.Headers.Add("Cache-Control", "private,max-age=300");
+                req.HttpContext.Response.Headers.Add("Cache-Control", "no-cache,no-store");
                 req.HttpContext.Response.Headers.Add("Expires", DateTime.Now.AddMinutes(5).ToUniversalTime().ToString("ddd, dd MMM yyyy HH:mm:ss G\\MT"));
                 req.HttpContext.Response.Headers.Add("Vary", "Origin");
 
