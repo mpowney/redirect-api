@@ -106,14 +106,13 @@ namespace api.v1
             }
 
             if (entity.Recycled) {
-                await RedirectEntity.delete(redirectTable, entity);
-                return new OkObjectResult(entity);
+                bool deleteSuccess = await RedirectEntity.delete(redirectTable, entity);
+                return deleteSuccess ? (IActionResult)new OkObjectResult(entity) : new BadRequestResult();
             }
 
             entity.Recycled = true;
-            await RedirectEntity.put(redirectTable, entity);
-
-            return new OkObjectResult(entity);
+            bool success = await RedirectEntity.put(redirectTable, entity);
+            return success ? (IActionResult)new OkObjectResult(entity) : new BadRequestResult();
 
         }
 
