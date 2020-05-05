@@ -24,7 +24,7 @@ namespace api.v1
 
         [FunctionName("ShortNameGet")]
         public static async Task<IActionResult> ShortNameGet (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{shortName:alpha}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{shortName:regex([\\w\\d]+)}")] HttpRequest req,
             [Table(TableNames.Redirects)] CloudTable redirectTable,
             [Table(TableNames.Domains)] CloudTable domainTable,
             [Queue(QueueNames.ProcessClicks), StorageAccount("AzureWebJobsStorage")] ICollector<HttpRequestEntity> processClicksQueue,
