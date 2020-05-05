@@ -59,7 +59,7 @@ namespace api.v1
                 return new OkObjectResult(new RedirectEntity[] {});
             }
 
-            return new OkObjectResult(entities);
+            return new OkObjectResult(filteredEntities);
 
         }
 
