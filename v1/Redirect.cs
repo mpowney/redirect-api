@@ -54,7 +54,7 @@ namespace api.v1
             }
 
             List<RedirectEntity> entities = (await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name));
-            RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == false).ToArray();
+            RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == true).ToArray();
             if (filteredEntities == null || filteredEntities.Length == 0) {
                 return new OkObjectResult(new RedirectEntity[] {});
             }
