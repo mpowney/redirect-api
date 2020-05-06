@@ -171,14 +171,15 @@ namespace api.v1
             log.LogInformation($"Getting Redirect row for values {claimsPrincipal.Identity.Name} and {entity.RowKey}");
             RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, key);
             if (existingEntity == null) {
-                return new BadRequestObjectResult($"Redirect with {entity.RowKey} doesn't exist for {claimsPrincipal.Identity.Name}");
+                return new BadRequestObjectResult($"Redirect with {key} doesn't exist for {claimsPrincipal.Identity.Name}");
             }
-            existingEntity.RedirectTo = entity.RedirectTo ??= existingEntity.RedirectTo;
-            existingEntity.Recycled = entity.Recycled ??= existingEntity.Recycled;
+
+            existingEntity.RedirectTo = entity.redirectTo ??= existingEntity.RedirectTo;
+            existingEntity.Recycled = entity.recycled ??= existingEntity.Recycled;
 
             bool success = await RedirectEntity.put(redirectTable, existingEntity);
             if (!success) {
-                return new BadRequestObjectResult($"Error occurred updating {entity.RowKey} for {claimsPrincipal.Identity.Name}");
+                return new BadRequestObjectResult($"Error occurred updating {key} for {claimsPrincipal.Identity.Name}");
             }
 
             return new OkResult();
