@@ -153,8 +153,9 @@ namespace api.v1
 
         [FunctionName("RedirectPatch")]
         public static async Task<IActionResult> RedirectPatch (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "_api/v1/redirect")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "patch", Route = "_api/v1/redirect/{key}")] HttpRequest req,
             [Table(TableNames.Redirects)] CloudTable redirectTable,
+            string key,
             ILogger log,
             ExecutionContext context,
             ClaimsPrincipal claimsPrincipal)
@@ -165,18 +166,15 @@ namespace api.v1
             }
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            RedirectEntity entity = JsonConvert.DeserializeObject<RedirectEntity>(requestBody);
-
-            if (entity.RowKey == null || entity.RedirectTo == null) {
-                return new BadRequestObjectResult($"Please specify the key and redirectTo parameters in the request body");
-            }
+            dynamic entity = JsonConvert.DeserializeObject<dynamic>(requestBody);
 
             log.LogInformation($"Getting Redirect row for values {claimsPrincipal.Identity.Name} and {entity.RowKey}");
-            RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, entity.RowKey);
+            RedirectEntity existingEntity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, key);
             if (existingEntity == null) {
                 return new BadRequestObjectResult($"Redirect with {entity.RowKey} doesn't exist for {claimsPrincipal.Identity.Name}");
             }
-            existingEntity.RedirectTo = entity.RedirectTo;
+            existingEntity.RedirectTo = entity.RedirectTo ??= existingEntity.RedirectTo;
+            existingEntity.Recycled = entity.Recycled ??= existingEntity.Recycled;
 
             bool success = await RedirectEntity.put(redirectTable, existingEntity);
             if (!success) {
