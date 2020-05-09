@@ -17,23 +17,26 @@ namespace api.entities
             
         }
         public string Account { get; set; }
-        public static async Task<DomainEntity> get(CloudTable domainTable, string key) {
+        public static async Task<List<DomainEntity>> get(CloudTable domainTable, string? key) {
 
             await domainTable.CreateIfNotExistsAsync();
 
-            TableQuery<DomainEntity> rangeQuery = new TableQuery<DomainEntity>().Where(
-                TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
-                            $"{string.Empty}"),
-                        TableOperators.And,
-                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, 
-                            $"{key}")));
+            TableQuery<DomainEntity> rangeQuery = key != null ? new TableQuery<DomainEntity>().Where(
+                    TableQuery.CombineFilters(
+                            TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
+                                $"{string.Empty}"),
+                            TableOperators.And,
+                            TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, 
+                                $"{key}"))) :
+                new TableQuery<DomainEntity>().Where(
+                            TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
+                                $"{string.Empty}"));
 
             var sessionRedirectFound = await domainTable.ExecuteQuerySegmentedAsync(rangeQuery, null);
             if (sessionRedirectFound.Results.Count > 0) {
 
-                DomainEntity entity = sessionRedirectFound.Results.ToArray()[0];
-                return entity;
+                List<DomainEntity> entities = sessionRedirectFound.Results;
+                return entities;
 
             }
             else {
@@ -82,6 +85,26 @@ namespace api.entities
             return true;
 
         }
+
+        public static async Task<bool> delete(CloudTable domainTable, DomainEntity entity) {
+     
+            await domainTable.CreateIfNotExistsAsync();
+            
+            try {
+
+                TableOperation deleteOperation = TableOperation.Delete(entity);
+                await domainTable.ExecuteAsync(deleteOperation);
+
+            }
+            catch {
+
+                return false;
+                
+            }
+            return true;
+
+        }
+
 
     }
 

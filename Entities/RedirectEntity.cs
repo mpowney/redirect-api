@@ -27,6 +27,18 @@ namespace api.entities
         public string GeoCount { get; set; }
         public DateTime Created { get; set; }
         public bool Recycled { get; set; }
+
+        public async Task<Dictionary<string, GeoEntityCount>> GetGeoCount(CloudTable geoTable) {
+
+            Dictionary<string, int> _geoCount = JsonConvert.DeserializeObject<Dictionary<string, int>>(this.GeoCount ??= "{}");;
+            Dictionary<string, GeoEntityCount> response = new Dictionary<string, GeoEntityCount>();
+            foreach (string key in _geoCount.Keys) {
+                response.Add(key, (GeoEntityCount)(await GeoEntity.get(geoTable, key)));
+            }
+
+            return response;
+        }
+
         public static async Task<RedirectEntity> get(CloudTable redirectTable, string? collection, string key) {
 
             await redirectTable.CreateIfNotExistsAsync();

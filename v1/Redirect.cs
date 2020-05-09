@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
@@ -63,6 +64,29 @@ namespace api.v1
 
         }
 
+        [FunctionName("RedirectsDashboardGet")]
+        public static async Task<IActionResult> RedirectsDashboardGet (
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirects/dashboard")] HttpRequest req,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
+            ILogger log,
+            ExecutionContext context,
+            ClaimsPrincipal claimsPrincipal)
+        {
+
+            if (!claimsPrincipal.Identity.IsAuthenticated) {
+                return new UnauthorizedResult();
+            }
+
+            List<RedirectEntity> entities = (await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name));
+            RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == true).ToArray();
+            if (filteredEntities == null || filteredEntities.Length == 0) {
+                return new OkObjectResult(new RedirectEntity[] {});
+            }
+
+            return new OkObjectResult(filteredEntities);
+
+        }
+
         [FunctionName("RedirectGet")]
         public static async Task<IActionResult> RedirectGet (
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirect/{key}")] HttpRequest req,
@@ -83,6 +107,60 @@ namespace api.v1
             }
 
             return new OkObjectResult(entity);
+
+        }
+
+        [FunctionName("RedirectAndHostGet")]
+        public static async Task<IActionResult> RedirectAndHostGet (
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirect/{host}/{key}")] HttpRequest req,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
+            [Table(TableNames.Domains)] CloudTable domainTable,
+            string host,
+            string key,
+            ILogger log,
+            ExecutionContext context,
+            ClaimsPrincipal claimsPrincipal)
+        {
+
+            List<DomainEntity> domainEntity = await DomainEntity.get(domainTable, host);
+            if (domainEntity == null) {
+                return new NotFoundResult();
+            }
+
+            RedirectEntity entity = await RedirectEntity.get(redirectTable, domainEntity.First().Account, key);
+            if (entity == null) {
+                return new NotFoundResult();
+            }
+
+            if (entity.Recycled) {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(new RedirectEntity(entity.PartitionKey, entity.RowKey, entity.RedirectTo, 0, new Dictionary<string, int>(), DateTime.Now, false));
+
+        }
+
+        [FunctionName("RedirectGetGeoCounts")]
+        public static async Task<IActionResult> RedirectGetGeoCounts (
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirect/{key}/geo")] HttpRequest req,
+            [Table(TableNames.Redirects)] CloudTable redirectTable,
+            [Table(TableNames.Geos)] CloudTable geoTable,
+            string key,
+            ILogger log,
+            ExecutionContext context,
+            ClaimsPrincipal claimsPrincipal)
+        {
+
+            if (!claimsPrincipal.Identity.IsAuthenticated) {
+                return new UnauthorizedResult();
+            }
+
+            RedirectEntity entity = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name, key);
+            if (entity == null) {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(await entity.GetGeoCount(geoTable));
 
         }
 

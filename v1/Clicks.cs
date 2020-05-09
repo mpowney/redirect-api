@@ -33,29 +33,52 @@ namespace api.v1
             ExecutionContext context)
         {
 
-            DomainEntity domain = await DomainEntity.get(domainTable, req.Host.Value);
-            if (domain == null) {
+            List<DomainEntity> domains = await DomainEntity.get(domainTable, req.Host.Value);
+            if (domains == null) {
                 return new NotFoundResult();
             }
 
-            RedirectEntity redirect = await RedirectEntity.get(redirectTable, domain.Account, shortName);
+            RedirectEntity redirect = await RedirectEntity.get(redirectTable, domains.First().Account, shortName);
 
-            if (redirect != null) {
+            if (redirect == null) {
 
-                if (redirect.Recycled) {
+
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(context.FunctionAppDirectory)
+                    .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                    .AddEnvironmentVariables()
+                    .Build();
+
+                string nodeMaster = config["NODE_MASTER_HOSTNAME"];
+
+                if (nodeMaster == null) {
                     return new NotFoundResult();
                 }
 
-                req.HttpContext.Response.Headers.Add("Cache-Control", "no-cache,no-store");
-                req.HttpContext.Response.Headers.Add("Expires", DateTime.Now.AddMinutes(5).ToUniversalTime().ToString("ddd, dd MMM yyyy HH:mm:ss G\\MT"));
-                req.HttpContext.Response.Headers.Add("Vary", "Origin");
+                string nodeMasterLookupUri = $"https://{nodeMaster}/_api/v1/redirect/{req.Host.Value}/{shortName}";
+                var client = new HttpClient();
+                var getResponse = await client.GetAsync(nodeMasterLookupUri);
 
-                processClicksQueue.Add(new HttpRequestEntity(req));
-                return new RedirectResult(redirect.RedirectTo, true);
+                if (getResponse.StatusCode != HttpStatusCode.OK) {
+                    return new NotFoundResult();
+                }
+
+                string masterResponseString = await getResponse.Content.ReadAsStringAsync();
+                redirect = JsonConvert.DeserializeObject<RedirectEntity>(masterResponseString);
+                await RedirectEntity.put(redirectTable, redirect);
 
             }
 
-            return new NotFoundResult();
+            if (redirect.Recycled) {
+                return new NotFoundResult();
+            }
+
+            req.HttpContext.Response.Headers.Add("Cache-Control", "no-cache,no-store");
+            req.HttpContext.Response.Headers.Add("Expires", DateTime.Now.AddMinutes(5).ToUniversalTime().ToString("ddd, dd MMM yyyy HH:mm:ss G\\MT"));
+            req.HttpContext.Response.Headers.Add("Vary", "Origin");
+
+            processClicksQueue.Add(new HttpRequestEntity(req));
+            return new RedirectResult(redirect.RedirectTo, true);
 
         }
 
@@ -72,15 +95,15 @@ namespace api.v1
 
             HttpRequestEntity queuedHttpRequest = JsonConvert.DeserializeObject<HttpRequestEntity>(queuedHttpRequestString);
 
-            DomainEntity domain = await DomainEntity.get(domainTable, queuedHttpRequest.Host);
+            List<DomainEntity> domains = await DomainEntity.get(domainTable, queuedHttpRequest.Host);
 
-            if (domain == null) {
+            if (domains == null) {
                 throw new Exception($"Unable to process Geo lookup - domain {queuedHttpRequest.Host} wasn't found");
             }
 
             string path = queuedHttpRequest.Path.Value.Substring(1);
 
-            RedirectEntity redirect = await RedirectEntity.get(redirectTable, domain.Account, path);
+            RedirectEntity redirect = await RedirectEntity.get(redirectTable, domains.First() .Account, path);
 
             if (redirect != null) {
 
@@ -126,15 +149,15 @@ namespace api.v1
             var getResponse = await client.GetAsync(ipLookupUrl);
             if (getResponse.StatusCode == HttpStatusCode.OK) {
 
-                DomainEntity domain = await DomainEntity.get(domainTable, queuedHttpRequest.Host);
+                List<DomainEntity> domains = await DomainEntity.get(domainTable, queuedHttpRequest.Host);
 
-                if (domain == null) {
+                if (domains == null) {
                     throw new Exception($"Unable to process Geo lookup - domain {queuedHttpRequest.Host} wasn't found");
                 }
 
                 string path = queuedHttpRequest.Path.Value.Substring(1);
 
-                RedirectEntity redirect = await RedirectEntity.get(redirectTable, domain.Account, path);
+                RedirectEntity redirect = await RedirectEntity.get(redirectTable, domains.First().Account, path);
 
                 if (redirect != null) {
 

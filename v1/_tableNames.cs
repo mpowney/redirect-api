@@ -5,6 +5,7 @@ namespace api.v1 {
         public const string Redirects = "v1Redirects";
         public const string Domains = "v1Domains";
         public const string Geos = "v1Geos";
+        public const string Nodes = "v1Nodes";
     }
 
 }

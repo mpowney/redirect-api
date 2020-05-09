@@ -90,5 +90,8 @@ namespace api.entities
         }
 
     }
+    public class GeoEntityCount : GeoEntity {
+        public int ClickCount { get; set; }
+    }
 
 }
