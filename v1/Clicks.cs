@@ -13,7 +13,9 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 using api.entities;
 
@@ -42,14 +44,13 @@ namespace api.v1
 
             if (redirect == null) {
 
-
                 var config = new ConfigurationBuilder()
                     .SetBasePath(context.FunctionAppDirectory)
                     .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
                     .AddEnvironmentVariables()
                     .Build();
 
-                string nodeMaster = config["NODE_MASTER_HOSTNAME"];
+                string nodeMaster = config["NODE_SYNC_MASTER_HOST"];
 
                 if (nodeMaster == null) {
                     return new NotFoundResult();
@@ -94,6 +95,27 @@ namespace api.v1
         {
 
             HttpRequestEntity queuedHttpRequest = JsonConvert.DeserializeObject<HttpRequestEntity>(queuedHttpRequestString);
+
+            var config = new ConfigurationBuilder()
+                .SetBasePath(context.FunctionAppDirectory)
+                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            string nodeMaster = config["NODE_SYNC_MASTER_CONN"];
+
+            if (nodeMaster != null) {
+
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(nodeMaster);
+                CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
+                CloudQueue destinationProcessClicksQueue = queueClient.GetQueueReference(QueueNames.ProcessClicks);
+
+                await destinationProcessClicksQueue.AddMessageAsync(new CloudQueueMessage(JsonConvert.SerializeObject(queuedHttpRequest)));
+                
+                return;
+
+            }
+
 
             List<DomainEntity> domains = await DomainEntity.get(domainTable, queuedHttpRequest.Host);
 
