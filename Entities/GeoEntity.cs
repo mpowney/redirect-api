@@ -9,6 +9,8 @@ namespace api.entities
     public class GeoEntity : TableEntity {
         public GeoEntity() { }
         public GeoEntity(string countryCode, string countryName, string regionCode, string city, string timeZone, double latitude, double longitude) {
+
+            this.PartitionKey = string.Empty;
             this.CountryCode = countryCode;
             this.CountryName = countryName;
             this.RegionCode = regionCode;
@@ -22,6 +24,8 @@ namespace api.entities
         }
 
         public GeoEntity(dynamic rawObject) {
+
+            this.PartitionKey = string.Empty;
             this.CountryCode = rawObject.country_code;
             this.CountryName = rawObject.country_name;
             this.RegionCode = rawObject.region_code;
