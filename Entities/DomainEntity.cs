@@ -17,6 +17,8 @@ namespace api.entities
             
         }
         public string Account { get; set; }
+        public bool Configured { get; set; }
+        public bool SslConfigured { get; set; }
         public static async Task<List<DomainEntity>> get(CloudTable domainTable, string? key) {
 
             await domainTable.CreateIfNotExistsAsync();
