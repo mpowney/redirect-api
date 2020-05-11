@@ -100,7 +100,7 @@ namespace api.entities
     }
     public class GeoEntityCount : GeoEntity {
 
-        public GeoEntityCount(GeoEntity geoEntity) {
+        public GeoEntityCount(GeoEntity geoEntity, int clickCount) {
             this.City = geoEntity.City;
             this.CountryCode = geoEntity.CountryCode;
             this.CountryName = geoEntity.CountryName;
@@ -110,6 +110,7 @@ namespace api.entities
             this.RowKey = geoEntity.RowKey;
             this.TimeZone = geoEntity.TimeZone;
             this.ZipCode = geoEntity.ZipCode;
+            this.ClickCount = clickCount;
         }
         public int ClickCount { get; set; }
     }
