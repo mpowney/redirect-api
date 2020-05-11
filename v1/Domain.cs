@@ -37,7 +37,7 @@ namespace api.v1
             }
 
             DomainEntity[] filteredEntities = entities.Where(domain => domain.Account == claimsPrincipal.Identity.Name).ToArray();
-            if (filteredEntities.Count() == 0) {
+            if (filteredEntities.Length == 0) {
                 return new NotFoundResult();
             }
 

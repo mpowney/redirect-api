@@ -34,10 +34,10 @@ namespace api.entities
                             TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
                                 $"{string.Empty}"));
 
-            var sessionRedirectFound = await domainTable.ExecuteQuerySegmentedAsync(rangeQuery, null);
-            if (sessionRedirectFound.Results.Count > 0) {
+            var domainsFound = await domainTable.ExecuteQuerySegmentedAsync(rangeQuery, null);
+            if (domainsFound.Results.Count > 0) {
 
-                List<DomainEntity> entities = sessionRedirectFound.Results;
+                List<DomainEntity> entities = domainsFound.Results;
                 return entities;
 
             }
