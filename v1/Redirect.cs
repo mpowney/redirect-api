@@ -32,6 +32,10 @@ namespace api.v1
             }
 
             List<RedirectEntity> entities = await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name);
+            if (entities == null) {
+                return new NotFoundResult();
+            }
+
             RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == false).ToArray();
             if (filteredEntities == null || filteredEntities.Length == 0) {
                 return new OkObjectResult(new RedirectEntity[] {});
@@ -55,6 +59,11 @@ namespace api.v1
             }
 
             List<RedirectEntity> entities = (await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name));
+            if (entities == null) {
+                return new NotFoundResult();
+            }
+
+
             RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == true).ToArray();
             if (filteredEntities == null || filteredEntities.Length == 0) {
                 return new OkObjectResult(new RedirectEntity[] {});
@@ -78,6 +87,10 @@ namespace api.v1
             }
 
             List<RedirectEntity> entities = (await RedirectEntity.get(redirectTable, claimsPrincipal.Identity.Name));
+            if (entities == null) {
+                return new NotFoundResult();
+            }
+
             RedirectEntity[] filteredEntities = entities.Where(redirect => redirect.Recycled == true).ToArray();
             if (filteredEntities == null || filteredEntities.Length == 0) {
                 return new OkObjectResult(new RedirectEntity[] {});
