@@ -33,7 +33,7 @@ namespace api.entities
             Dictionary<string, int> _geoCount = JsonConvert.DeserializeObject<Dictionary<string, int>>(this.GeoCount ??= "{}");;
             Dictionary<string, GeoEntityCount> response = new Dictionary<string, GeoEntityCount>();
             foreach (string key in _geoCount.Keys) {
-                response.Add(key, (GeoEntityCount)(await GeoEntity.get(geoTable, key)));
+                response.Add(key, new GeoEntityCount(await GeoEntity.get(geoTable, key)));
             }
 
             return response;
