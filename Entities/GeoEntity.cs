@@ -51,8 +51,12 @@ namespace api.entities
             await geoTable.CreateIfNotExistsAsync();
 
             TableQuery<GeoEntity> rangeQuery = new TableQuery<GeoEntity>().Where(
+                    TableQuery.CombineFilters(
+                            TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, 
+                                $"{string.Empty}"),
+                            TableOperators.And,
                         TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, 
-                            $"{key}"));
+                            $"{key}")));
 
             var sessionRedirectFound = await geoTable.ExecuteQuerySegmentedAsync(rangeQuery, null);
             if (sessionRedirectFound.Results.Count > 0) {
