@@ -33,11 +33,13 @@ namespace api.v1
 
             List<DomainEntity> entities = await DomainEntity.get(domainTable, null);
             if (entities == null) {
+                log.LogDebug($"No domains found in the table");
                 return new NotFoundResult();
             }
 
             DomainEntity[] filteredEntities = entities.Where(domain => domain.Account == claimsPrincipal.Identity.Name).ToArray();
             if (filteredEntities.Length == 0) {
+                log.LogDebug($"No domains found with account {claimsPrincipal.Identity.Name}");
                 return new NotFoundResult();
             }
 
