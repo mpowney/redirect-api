@@ -125,7 +125,7 @@ namespace api.v1
 
         [FunctionName("RedirectGetGeoCounts")]
         public static async Task<IActionResult> RedirectGetGeoCounts (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirect/{key:regex([\\w\\d]+)}/geo")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirect/{key}/geo")] HttpRequest req,
             [Table(TableNames.Redirects)] CloudTable redirectTable,
             [Table(TableNames.Geos)] CloudTable geoTable,
             string key,
@@ -149,7 +149,7 @@ namespace api.v1
 
         [FunctionName("RedirectAndHostGet")]
         public static async Task<IActionResult> RedirectAndHostGet (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/redirect/{host}/{key}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_api/v1/host/redirect/{host}/{key}")] HttpRequest req,
             [Table(TableNames.Redirects)] CloudTable redirectTable,
             [Table(TableNames.Domains)] CloudTable domainTable,
             string host,

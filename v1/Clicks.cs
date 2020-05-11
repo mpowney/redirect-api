@@ -56,7 +56,7 @@ namespace api.v1
                     return new NotFoundResult();
                 }
 
-                string nodeMasterLookupUri = $"https://{nodeMaster}/_api/v1/redirect/{req.Host.Value}/{shortName}";
+                string nodeMasterLookupUri = $"https://{nodeMaster}/_api/v1/host/redirect/{req.Host.Value}/{shortName}";
                 var client = new HttpClient();
                 var getResponse = await client.GetAsync(nodeMasterLookupUri);
 
