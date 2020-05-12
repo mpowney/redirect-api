@@ -30,6 +30,7 @@ namespace api.v1
             [Table(TableNames.Redirects)] CloudTable redirectTable,
             [Table(TableNames.Domains)] CloudTable domainTable,
             [Queue(QueueNames.ProcessClicks), StorageAccount("AzureWebJobsStorage")] ICollector<HttpRequestEntity> processClicksQueue,
+            [Queue(QueueNames.NotFoundClicks), StorageAccount("AzureWebJobsStorage")] ICollector<HttpRequestEntity> notFoundClicksQueue,
             string shortName,
             ILogger log,
             ExecutionContext context)
@@ -37,6 +38,7 @@ namespace api.v1
 
             List<DomainEntity> domains = await DomainEntity.get(domainTable, req.Host.Value);
             if (domains == null) {
+                notFoundClicksQueue.Add(new NotFoundEntity(req, "Domain not handled"));
                 return new NotFoundResult();
             }
 
@@ -53,6 +55,7 @@ namespace api.v1
                 string nodeMaster = config["NODE_SYNC_MASTER_HOST"];
 
                 if (nodeMaster == null) {
+                    notFoundClicksQueue.Add(new NotFoundEntity(req, "Node master not found"));
                     return new NotFoundResult();
                 }
 
@@ -61,6 +64,7 @@ namespace api.v1
                 var getResponse = await client.GetAsync(nodeMasterLookupUri);
 
                 if (getResponse.StatusCode != HttpStatusCode.OK) {
+                    notFoundClicksQueue.Add(new NotFoundEntity(req, "Node master returned not found"));
                     return new NotFoundResult();
                 }
 
@@ -71,6 +75,7 @@ namespace api.v1
             }
 
             if (redirect.Recycled) {
+                notFoundClicksQueue.Add(new NotFoundEntity(req, "Short name has been recycled"));
                 return new NotFoundResult();
             }
 

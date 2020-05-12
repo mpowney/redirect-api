@@ -4,6 +4,7 @@ namespace api.v1 {
         public const string ProcessClicks = "processclicks";
         public const string ProcessClicksGeo = "processclicksgeo";
         public const string SynchroniseRedirects = "synchroniseredirects";
+        public const string NotFoundClicks = "notfoundclicks";
     }
 
 }
