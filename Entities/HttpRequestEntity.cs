@@ -18,6 +18,8 @@ namespace api.entities {
             this.QueryString = req.QueryString;
             this.RemoteIpAddress = req.HttpContext.Connection.RemoteIpAddress.ToString();
             this.Scheme = req.Scheme;
+            this.Referer = req.Headers["Referer"].ToString();
+            this.UserAgent = req.Headers["User-Agent"].ToString();
         }
 
         public long? ContentLength { get; set; }
@@ -31,6 +33,8 @@ namespace api.entities {
         public QueryString QueryString { get; set; }
         public string RemoteIpAddress {get; set; }
         public string Scheme { get; set; }
+        public string Referer { get; set; }
+        public string UserAgent { get; set; }
     }
     
 }

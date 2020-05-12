@@ -18,8 +18,9 @@ namespace api.entities {
             this.QueryString = req.QueryString;
             this.RemoteIpAddress = req.HttpContext.Connection.RemoteIpAddress.ToString();
             this.Scheme = req.Scheme;
+            this.Referer = req.Headers["Referer"].ToString();
+            this.UserAgent = req.Headers["User-Agent"].ToString();
             this.Reason = reason;
-
         }
 
         public string Reason { get; set; }
